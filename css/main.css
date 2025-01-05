@@ -1,14 +1,140 @@
-/* 主要樣式 */
-.main-container {
-    padding: 20px;
+/* main.css */
+:root {
+    --atomy-blue: #0066B3;
+    --atomy-dark-blue: #004C87;
+    --atomy-light-blue: #E5F0F9;
+    --atomy-dark: #333333;
+    --atomy-gray: #666666;
+    --atomy-light-gray: #f5f5f5;
+    --atomy-border: #e0e0e0;
 }
 
-.stats-card {
-    background: #fff;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background-color: #f8f9fa;
+    color: var(--atomy-dark);
+}
+
+/* 導航欄樣式 */
+.navbar {
+    background-color: var(--atomy-blue) !important;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1rem 0;
 }
 
-/* 其他主要樣式 */
+.navbar-brand {
+    color: white !important;
+    font-weight: 600;
+    font-size: 1.3rem;
+}
+
+.nav-link {
+    color: white !important;
+    font-weight: 500;
+}
+
+.navbar-toggler {
+    border-color: rgba(255,255,255,0.5);
+}
+
+.navbar-toggler-icon {
+    filter: brightness(0) invert(1);
+}
+
+/* 按鈕樣式 */
+.btn-primary {
+    background-color: var(--atomy-blue);
+    border-color: var(--atomy-blue);
+}
+
+.btn-primary:hover {
+    background-color: var(--atomy-dark-blue);
+    border-color: var(--atomy-dark-blue);
+}
+
+.btn-outline-primary {
+    color: var(--atomy-blue);
+    border-color: var(--atomy-blue);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--atomy-blue);
+    border-color: var(--atomy-blue);
+}
+
+/* 卡片樣式 */
+.card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: var(--atomy-light-blue);
+    border-bottom: 1px solid var(--atomy-border);
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    color: var(--atomy-dark);
+}
+
+/* 統計卡片樣式 */
+.stats-card .card-body {
+    padding: 1.5rem;
+}
+
+.stats-card .card-subtitle {
+    color: var(--atomy-gray);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.stats-card .card-title {
+    color: var(--atomy-blue);
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+/* 表單元素樣式 */
+.form-control {
+    border-radius: 6px;
+    border: 1px solid var(--atomy-border);
+    padding: 0.5rem 0.75rem;
+}
+
+.form-control:focus {
+    border-color: var(--atomy-blue);
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 179, 0.25);
+}
+
+/* 表格樣式 */
+.tabulator {
+    border: none;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tabulator-header {
+    background-color: var(--atomy-light-blue);
+    border-bottom: 1px solid var(--atomy-border);
+}
+
+.tabulator-row {
+    border-bottom: 1px solid var(--atomy-border);
+}
+
+.tabulator-row.tabulator-selectable:hover {
+    background-color: var(--atomy-light-blue);
+}
+
+/* 購物車按鈕樣式 */
+#cartToggle {
+    background-color: white;
+    color: var(--atomy-blue);
+    border-color: white;
+}
+
+#cartToggle:hover {
+    background-color: var(--atomy-light-blue);
+}

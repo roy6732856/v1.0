@@ -1,12 +1,12 @@
-/* 桌面版側邊欄樣式 */
+/* cart.css */
 .cart-sidebar {
     position: fixed;
     top: 0;
-    right: -400px; /* 初始位置在螢幕外 */
+    right: -400px;
     width: 400px;
     height: 100vh;
     background-color: #fff;
-    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
     transition: right 0.3s ease;
     z-index: 1045;
 }
@@ -15,20 +15,82 @@
     right: 0;
 }
 
-/* 移動端適配 */
+.cart-header {
+    background-color: var(--atomy-blue);
+    color: white;
+    padding: 1rem 1.5rem !important;
+}
+
+.cart-header h5 {
+    font-weight: 600;
+}
+
+.cart-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.cart-body {
+    padding: 1.5rem !important;
+}
+
+.cart-item {
+    border-bottom: 1px solid var(--atomy-border);
+    padding: 1rem 0;
+}
+
+.cart-item:last-child {
+    border-bottom: none;
+}
+
+/* 數量控制按鈕樣式 */
+.quantity-control-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.quantity-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.quantity-btn.increase {
+    background-color: var(--atomy-blue);
+    border-color: var(--atomy-blue);
+}
+
+.quantity-btn.decrease {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.quantity-display {
+    min-width: 40px;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* 移動端樣式 */
 @media (max-width: 768px) {
     .cart-sidebar {
-        display: none; /* 在移動端隱藏側邊欄 */
+        display: none;
     }
-}
-
-/* 確保移動端 modal 正常顯示 */
-.modal-fullscreen-sm-down {
-    padding: 0;
-}
-
-@media (max-width: 768px) {
-    .modal.fade .modal-dialog {
-        margin: 0;
+    
+    .modal-content {
+        border-radius: 0;
+    }
+    
+    .modal-header {
+        background-color: var(--atomy-blue);
+        color: white;
+    }
+    
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
     }
 }
