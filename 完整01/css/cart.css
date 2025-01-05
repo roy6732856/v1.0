@@ -1,0 +1,34 @@
+/* 桌面版側邊欄樣式 */
+.cart-sidebar {
+    position: fixed;
+    top: 0;
+    right: -400px; /* 初始位置在螢幕外 */
+    width: 400px;
+    height: 100vh;
+    background-color: #fff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    transition: right 0.3s ease;
+    z-index: 1045;
+}
+
+.cart-sidebar.show {
+    right: 0;
+}
+
+/* 移動端適配 */
+@media (max-width: 768px) {
+    .cart-sidebar {
+        display: none; /* 在移動端隱藏側邊欄 */
+    }
+}
+
+/* 確保移動端 modal 正常顯示 */
+.modal-fullscreen-sm-down {
+    padding: 0;
+}
+
+@media (max-width: 768px) {
+    .modal.fade .modal-dialog {
+        margin: 0;
+    }
+}

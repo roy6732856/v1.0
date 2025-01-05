@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>產品試算工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+    
+    <!-- 產品資料 -->
+    <script src="./product.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- 統計摘要 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-lg shadow p-4">
+                <h2 class="text-gray-500 text-sm">選擇項目數</h2>
+                <p class="text-2xl font-bold" id="itemCount">0</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <h2 class="text-gray-500 text-sm">總數量</h2>
+                <p class="text-2xl font-bold" id="totalQuantity">0</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <h2 class="text-gray-500 text-sm">總金額</h2>
+                <p class="text-2xl font-bold text-blue-600" id="totalPrice">NT$ 0</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <h2 class="text-gray-500 text-sm">總 PV</h2>
+                <p class="text-2xl font-bold text-green-600" id="totalPV">0</p>
+            </div>
+        </div>
+
+        <!-- 搜尋和過濾區 -->
+        <div class="bg-white rounded-lg shadow p-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- 商品名稱搜尋 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">商品名稱</label>
+                    <input type="text" id="searchName" placeholder="搜尋商品..." 
+                           class="w-full px-4 py-2 border rounded-lg">
+                </div>
+                
+                <!-- 價格範圍 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">價格範圍</label>
+                    <div class="flex space-x-2">
+                        <input type="number" id="minPrice" placeholder="最低" 
+                               class="w-1/2 px-4 py-2 border rounded-lg">
+                        <input type="number" id="maxPrice" placeholder="最高" 
+                               class="w-1/2 px-4 py-2 border rounded-lg">
+                    </div>
+                </div>
+                
+                <!-- PV範圍 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">PV 範圍</label>
+                    <div class="flex space-x-2">
+                        <input type="number" id="minPV" placeholder="最低" 
+                               class="w-1/2 px-4 py-2 border rounded-lg">
+                        <input type="number" id="maxPV" placeholder="最高" 
+                               class="w-1/2 px-4 py-2 border rounded-lg">
+                    </div>
+                </div>
+
+                <!-- 按鈕組 -->
+                <div class="flex items-end space-x-2">
+                    <button onclick="applyFilters()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                        套用篩選
+                    </button>
+                    <button onclick="resetFilters()" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                        重置篩選
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 商品表格 -->
+        <div class="bg-white rounded-lg shadow p-4">
+            <div id="productTable"></div>
+        </div>
+
+        <!-- 功能按鈕 -->
+        <div class="mt-6 flex justify-end space-x-4">
+            <button onclick="resetAll()" class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                重置所有選擇
+            </button>
+            <button onclick="exportToCSV()" class="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                匯出報表
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let table;
+
+        // 初始化表格
+        document.addEventListener('DOMContentLoaded', function(){
+    table = new Tabulator("#productTable", {
+        data: products,
+        layout: "fitColumns",
+        pagination: true,
+        paginationSize: 10,
+        columns: [
+            {title: "商品名稱", field: "name", sorter: "string"},
+            {
+                title: "價格", 
+                field: "price", 
+                sorter: "number", 
+                formatter: function(cell){
+                    return `NT$ ${cell.getValue().toLocaleString('en-US', {
+                        maximumFractionDigits: 0,
+                        minimumFractionDigits: 0
+                    })}`;
+                }
+            },
+            {
+                title: "PV", 
+                field: "pv", 
+                sorter: "number",
+                formatter: function(cell){
+                    return cell.getValue().toLocaleString('en-US', {
+                        maximumFractionDigits: 0,
+                        minimumFractionDigits: 0
+                    });
+                }
+            },
+            {
+                title: "數量", 
+                field: "quantity", 
+                editor: "number", 
+                editorParams: {
+                    min: 0,
+                    max: 999,
+                    step: 1
+                }, 
+                cellEdited: function(cell) {
+                    cell.getRow().reformat();
+                }
+            },
+            {
+                title: "小計金額", 
+                field: "subtotalPrice", 
+                formatter: function(cell){
+                    const row = cell.getRow().getData();
+                    const quantity = row.quantity || 0;
+                    const subtotal = row.price * quantity;
+                    return `NT$ ${subtotal.toLocaleString('en-US', {
+                        maximumFractionDigits: 0,
+                        minimumFractionDigits: 0
+                    })}`;
+                }
+            },
+            {
+                title: "小計PV", 
+                field: "subtotalPV", 
+                formatter: function(cell){
+                    const row = cell.getRow().getData();
+                    const quantity = row.quantity || 0;
+                    const subtotalPV = row.pv * quantity;
+                    return subtotalPV.toLocaleString('en-US', {
+                        maximumFractionDigits: 0,
+                        minimumFractionDigits: 0
+                    });
+                }
+            }
+        ],
+    });
+
+    // 數量變更時更新總計
+    table.on("cellEdited", function(cell){
+        updateTotals();
+    });
+});
+
+
+        // 更新總計
+        function updateTotals() {
+    const data = table.getData();
+    let totalPrice = 0;
+    let totalPV = 0;
+    let totalQuantity = 0;
+    let itemCount = 0;
+
+    data.forEach(row => {
+        const quantity = row.quantity || 0;
+        if (quantity > 0) {
+            totalPrice += row.price * quantity;
+            totalPV += row.pv * quantity;
+            totalQuantity += quantity;
+            itemCount++;
+        }
+    });
+
+    document.getElementById("itemCount").textContent = itemCount;
+    document.getElementById("totalQuantity").textContent = totalQuantity.toLocaleString('en-US', {
+        maximumFractionDigits: 0,
+        minimumFractionDigits: 0
+    });
+    document.getElementById("totalPrice").textContent = `NT$ ${totalPrice.toLocaleString('en-US', {
+        maximumFractionDigits: 0,
+        minimumFractionDigits: 0
+    })}`;
+    document.getElementById("totalPV").textContent = totalPV.toLocaleString('en-US', {
+        maximumFractionDigits: 0,
+        minimumFractionDigits: 0
+    });
+}
+
+
+        // 套用篩選條件
+        function applyFilters() {
+    const nameFilter = document.getElementById("searchName").value;
+    const minPrice = parseFloat(document.getElementById("minPrice").value) || 0;
+    const maxPrice = parseFloat(document.getElementById("maxPrice").value) || Infinity;
+    const minPV = parseFloat(document.getElementById("minPV").value) || 0;
+    const maxPV = parseFloat(document.getElementById("maxPV").value) || Infinity;
+
+    table.setFilter(function(data){
+        // 名稱篩選
+        const nameMatch = !nameFilter || data.name.toLowerCase().includes(nameFilter.toLowerCase());
+        // 價格範圍篩選
+        const priceMatch = data.price >= minPrice && data.price <= maxPrice;
+        // PV範圍篩選
+        const pvMatch = data.pv >= minPV && data.pv <= maxPV;
+
+        return nameMatch && priceMatch && pvMatch;
+    });
+}
+
+
+        // 重置篩選
+        function resetFilters() {
+            document.getElementById("searchName").value = "";
+            document.getElementById("minPrice").value = "";
+            document.getElementById("maxPrice").value = "";
+            document.getElementById("minPV").value = "";
+            document.getElementById("maxPV").value = "";
+            table.clearFilter();
+        }
+
+        // 重置所有選擇
+        function resetAll() {
+            if(confirm('確定要重置所有選擇嗎？')) {
+                table.getData().forEach(row => {
+                    row.quantity = 0;
+                });
+                table.setData(table.getData());
+                updateTotals();
+            }
+        }
+
+        // 匯出報表
+        function exportToCSV() {
+            const data = table.getData();
+            const selectedItems = data.filter(row => row.quantity > 0);
+            
+            if(selectedItems.length === 0) {
+                alert('沒有選擇任何商品！');
+                return;
+            }
+
+            const csv = [
+                ['商品名稱', '單價', 'PV', '數量', '金額小計', 'PV小計'],
+                ...selectedItems.map(item => [
+                    item.name,
+                    item.price,
+                    item.pv,
+                    item.quantity,
+                    item.price * item.quantity,
+                    item.pv * item.quantity
+                ])
+            ].map(row => row.join(',')).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "產品試算報表.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
